@@ -18,6 +18,14 @@ jobs:
         with:
           node-version: '18' # Use appropriate Node.js version
           
+      - name: Fix package-lock.json sync
+        run: |
+          # Remove package-lock.json and node_modules to ensure clean state
+          rm -f package-lock.json
+          rm -rf node_modules
+          # Generate new lock file from package.json
+          npm install
+        
       - name: Install dependencies
         run: npm ci
         
