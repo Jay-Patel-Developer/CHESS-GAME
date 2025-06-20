@@ -3,11 +3,11 @@ import path from 'path';
 import react from '@vitejs/plugin-react';
 
 // Get the repository name for GitHub Pages deployment
-const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'chess-game';
+const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'CHESS-GAME';
 
 export default defineConfig({
   plugins: [react()],
-  base: process.env.NODE_ENV === 'production' ? `/${repo}/` : '/chess-game/', // Add this line for GitHub Pages deployment
+  base: process.env.NODE_ENV === 'production' ? `/${repo}/` : '/CHESS-GAME/', // Updated for correct repository name
   resolve: {
     alias: {
       '@': path.resolve('./src'),
