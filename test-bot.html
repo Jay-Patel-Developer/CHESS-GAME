@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Chess AI Test</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .running {
+            background-color: #2196F3;
+            color: white;
+        }
+        .success {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .partial {
+            background-color: #FF9800;
+            color: white;
+        }
+        .error {
+            background-color: #f44336;
+            color: white;
+        }
+        .log {
+            background-color: #2d2d2d;
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .test-info {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #555;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Comprehensive Stockfish AI Test Suite</h1>
+    
+    <div class="test-info">
+        <h3>Test Coverage:</h3>
+        <ul>
+            <li>📋 Opening Position Analysis</li>
+            <li>🎯 Tactical Position Evaluation</li>
+            <li>⚡ Mate Detection (Forced Win)</li>
+            <li>🏰 Endgame Calculation</li>
+            <li>📊 Multiple Depth Analysis</li>
+        </ul>
+    </div>
+
+    <div id="progress-container" style="display: none;">
+        <div class="progress">
+            <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+        </div>
+        <div id="progress-text">Initializing...</div>
+    </div>
+
+    <div id="status" class="status running">🔄 Initializing Stockfish AI test suite...</div>
+    
+    <h3>📊 Test Output:</h3>
+    <div id="log" class="log">Starting comprehensive AI test...\n</div>
+
+    <script type="module">
+        import './src/test-bot.ts';
+        
+        // Capture console output and provide visual feedback
+        const originalLog = console.log;
+        const originalError = console.error;
+        const logElement = document.getElementById('log');
+        const statusElement = document.getElementById('status');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        
+        let testCount = 0;
+        let completedTests = 0;
+        let passedTests = 0;
+        
+        // Extract test count from the test cases (we know there are 5)
+        const totalTests = 5;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg
+            ).join(' ');
+            
+            logElement.textContent += message + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Update progress and status based on log messages
+            if (message.includes('Starting comprehensive Stockfish AI test')) {
+                statusElement.textContent = '🔧 Initializing Stockfish engine...';
+                progressContainer.style.display = 'block';
+            }
+            
+            if (message.includes('Stockfish engine is ready')) {
+                statusElement.textContent = '✅ Engine ready - Running tests...';
+                statusElement.className = 'status running';
+            }
+            
+            if (message.includes('Test ') && message.includes('/')) {
+                const match = message.match(/Test (\d+)\/(\d+)/);
+                if (match) {
+                    const current = parseInt(match[1]);
+                    const total = parseInt(match[2]);
+                    const progress = ((current - 1) / total) * 100;
+                    progressBar.style.width = progress + '%';
+                    progressText.textContent = `Running test ${current} of ${total}`;
+                }
+            }
+            
+            if (message.includes('Test passed:') || message.includes('✅ Test passed')) {
+                passedTests++;
+                completedTests++;
+            }
+            
+            if (message.includes('Test failed:') || message.includes('❌ Test failed')) {
+                completedTests++;
+            }
+            
+            if (message.includes('Overall Result:')) {
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Tests completed';
+                
+                if (message.includes(`${totalTests}/${totalTests} tests passed`)) {
+                    statusElement.textContent = '🎉 All tests passed! Stockfish AI is working perfectly.';
+                    statusElement.className = 'status success';
+                } else if (passedTests > 0) {
+                    statusElement.textContent = `⚠️ ${passedTests}/${totalTests} tests passed. AI is partially working.`;
+                    statusElement.className = 'status partial';
+                } else {
+                    statusElement.textContent = '❌ All tests failed. AI is not working properly.';
+                    statusElement.className = 'status error';
+                }
+            }
+            
+            if (message.includes('Testing completed')) {
+                setTimeout(() => {
+                    statusElement.textContent += ' Click refresh to run again.';
+                }, 1000);
+            }
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            const message = '❌ ERROR: ' + args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg
+            ).join(' ');
+            
+            logElement.textContent += message + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            if (args[0]?.includes?.('Engine initialization timed out') || 
+                args[0]?.includes?.('Failed to create worker')) {
+                statusElement.textContent = '💥 Critical error: Engine failed to initialize';
+                statusElement.className = 'status error';
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Test failed - Engine error';
+            }
+        };
+        
+        // Fallback timeout in case something goes wrong
+        setTimeout(() => {
+            if (!statusElement.textContent.includes('passed') && 
+                !statusElement.textContent.includes('failed') &&
+                !statusElement.textContent.includes('error')) {
+                statusElement.textContent = '⏰ Test timed out after 2 minutes. Check console for details.';
+                statusElement.className = 'status error';
+            }
+        }, 120000); // 2 minute timeout
+    </script>
+</body>
+</html>

@@ -1,17 +1,20 @@
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
-import type { Square as SquareType, Position } from '../types';
+import { useBot } from '../context/BotContext';
+import type { Square as SquareType, Position } from '../types/index';
 import { switchPlayer } from '../utils/chessLogic';
 import PieceComponent from './Piece';
+import ThinkingIndicator from './ThinkingIndicator';
 import { useChessSound } from '../utils/useSound';
 import '../styles/ChessBoard.css';
 
 const Board: FC = () => {
-    const { state, selectPiece, movePiece } = useGame();
+    const { state, selectPiece, movePiece, isBoardFlipped } = useGame();
     const { board, selectedPiece, validMoves, currentPlayer, gameStatus } = state;
     const { playSound } = useChessSound();
     const [focusedPosition, setFocusedPosition] = useState<Position>({ row: 0, col: 0 });
+    const { botColor, makeBotMove, isThinking } = useBot();
 
     // Play appropriate sounds when game state changes
     useEffect(() => {
@@ -24,6 +27,19 @@ const Board: FC = () => {
                 break;
         }
     }, [gameStatus, playSound]);
+
+    // Trigger bot move when it's the bot's turn
+    useEffect(() => {
+        // Check if it's the bot's turn and the game is still active
+        if (currentPlayer === botColor && gameStatus === 'playing' && !isThinking) {
+            // Add a small delay for better user experience
+            const timeoutId = setTimeout(() => {
+                makeBotMove();
+            }, 500);
+            
+            return () => clearTimeout(timeoutId);
+        }
+    }, [currentPlayer, botColor, gameStatus, isThinking, makeBotMove]); // Fixed: Added makeBotMove dependency
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         e.preventDefault();
@@ -50,6 +66,11 @@ const Board: FC = () => {
     };
 
     const handleSquareClick = (square: SquareType) => {
+        // Don't allow moves during bot's turn
+        if (currentPlayer === botColor) {
+            return;
+        }
+        
         // Deselect piece if clicking on the same square
         if (selectedPiece && selectedPiece.position.row === square.row && selectedPiece.position.col === square.col) {
             selectPiece(undefined);
@@ -74,6 +95,83 @@ const Board: FC = () => {
         }
     };
 
+    // Create the board rows in the correct order based on whether the board is flipped
+    const renderBoard = () => {
+        const rowIndices = [...Array(8).keys()];
+        const colIndices = [...Array(8).keys()];
+        
+        // If the board is flipped, reverse the row and column indices
+        const orderedRowIndices = isBoardFlipped ? rowIndices : [...rowIndices].reverse();
+        const orderedColIndices = isBoardFlipped ? [...colIndices].reverse() : colIndices;
+
+        return orderedRowIndices.map(rowIndex => (
+            <div key={rowIndex} className="row" role="row">
+                {orderedColIndices.map(colIndex => {
+                    const actualRow = isBoardFlipped ? 7 - rowIndex : rowIndex;
+                    const actualCol = isBoardFlipped ? 7 - colIndex : colIndex;
+                    const square = board[actualRow][actualCol];
+                    
+                    const isSelected = selectedPiece?.position.row === actualRow && 
+                                    selectedPiece?.position.col === actualCol;
+                    const isValidMove = validMoves.some(move => 
+                        move.row === actualRow && move.col === actualCol
+                    );
+                    const isFocused = focusedPosition.row === actualRow && 
+                                    focusedPosition.col === actualCol;
+
+                    return (
+                        <div
+                            key={colIndex}
+                            className={`square ${(actualRow + actualCol) % 2 === 0 ? 'light' : 'dark'}${
+                                isSelected ? ' selected' : ''}${
+                                isValidMove ? ' valid-move' : ''}${
+                                square.piece && isValidMove ? ' captured' : ''}${
+                                isFocused ? ' focused' : ''}`}
+                            onClick={() => handleSquareClick(square)}
+                            role="gridcell"
+                            aria-label={`${String.fromCharCode(97 + actualCol)}${8 - actualRow}${
+                                square.piece ? ` - ${square.piece.color} ${square.piece.type}` : ''
+                            }`}
+                            tabIndex={isFocused ? 0 : -1}
+                            onFocus={() => setFocusedPosition({ row: actualRow, col: actualCol })}
+                        >
+                            {square.piece && (
+                                <PieceComponent 
+                                    piece={square.piece}
+                                    onClick={() => handleSquareClick(square)}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        ));
+    };
+
+    // Render coordinates around the board based on whether the board is flipped
+    const renderCoordinates = () => {
+        const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
+        
+        const orderedFiles = isBoardFlipped ? [...files].reverse() : files;
+        const orderedRanks = isBoardFlipped ? [...ranks].reverse() : ranks;
+        
+        return (
+            <>
+                <div className="coordinates-x">
+                    {orderedFiles.map((file, i) => (
+                        <span key={i} className="coordinate">{file}</span>
+                    ))}
+                </div>
+                <div className="coordinates-y">
+                    {orderedRanks.map((rank, i) => (
+                        <span key={i} className="coordinate">{rank}</span>
+                    ))}
+                </div>
+            </>
+        );
+    };
+
     return (
         <div 
             className="chess-board"
@@ -83,54 +181,10 @@ const Board: FC = () => {
             aria-label="Chess board"
         >
             <div className="board-content">
-                {board.map((row, rowIndex) => (
-                    <div key={rowIndex} className="row" role="row">
-                        {row.map((square, colIndex) => {
-                            const isSelected = selectedPiece?.position.row === rowIndex && 
-                                            selectedPiece?.position.col === colIndex;
-                            const isValidMove = validMoves.some(move => 
-                                move.row === rowIndex && move.col === colIndex
-                            );
-                            const isFocused = focusedPosition.row === rowIndex && 
-                                            focusedPosition.col === colIndex;
-
-                            return (
-                                <div
-                                    key={colIndex}
-                                    className={`square ${(rowIndex + colIndex) % 2 === 0 ? 'light' : 'dark'}${
-                                        isSelected ? ' selected' : ''}${
-                                        isValidMove ? ' valid-move' : ''}${
-                                        isFocused ? ' focused' : ''}`}
-                                    onClick={() => handleSquareClick(square)}
-                                    role="gridcell"
-                                    aria-label={`${String.fromCharCode(97 + colIndex)}${8 - rowIndex}${
-                                        square.piece ? ` - ${square.piece.color} ${square.piece.type}` : ''
-                                    }`}
-                                    tabIndex={isFocused ? 0 : -1}
-                                    onFocus={() => setFocusedPosition({ row: rowIndex, col: colIndex })}
-                                >
-                                    {square.piece && (
-                                        <PieceComponent 
-                                            piece={square.piece}
-                                            onClick={() => handleSquareClick(square)}
-                                        />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                ))}
+                {renderBoard()}
             </div>
-            <div className="coordinates-x">
-                {[...Array(8)].map((_, i) => (
-                    <span key={i} className="coordinate">{String.fromCharCode(97 + i)}</span>
-                ))}
-            </div>
-            <div className="coordinates-y">
-                {[...Array(8)].map((_, i) => (
-                    <span key={i} className="coordinate">{8 - i}</span>
-                ))}
-            </div>
+            {renderCoordinates()}
+            
             {state.gameStatus === 'checkmate' && (
                 <div className="game-over" role="alert">
                     Checkmate! {switchPlayer(currentPlayer)} wins!
@@ -140,6 +194,9 @@ const Board: FC = () => {
                 <div className="check-alert" role="alert">
                     Check!
                 </div>
+            )}
+            {isThinking && currentPlayer === botColor && (
+                <ThinkingIndicator />
             )}
         </div>
     );

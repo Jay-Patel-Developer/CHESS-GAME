@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useReducer } from 'react';
-import type { GameState, Piece, Square } from '../types';
+import React, { createContext, useContext, useReducer, useState } from 'react';
+import type { GameState, Piece, Square } from '../types/index';
 import { initializeBoard, calculateValidMoves, isMoveValid, isCheckmate, switchPlayer } from '../utils/chessLogic';
 
 interface GameContextType {
@@ -7,6 +7,9 @@ interface GameContextType {
     selectPiece: (piece: Piece | undefined) => void;
     movePiece: (toSquare: Square) => void;
     resetGame: () => void;
+    undoLastMove: () => void;
+    isBoardFlipped: boolean;
+    flipBoard: () => void;
 }
 
 const initialState: GameState = {
@@ -25,6 +28,7 @@ type GameAction =
     | { type: 'SELECT_PIECE'; piece: Piece | undefined }
     | { type: 'MOVE_PIECE'; toSquare: Square }
     | { type: 'RESET_GAME' }
+    | { type: 'UNDO_MOVE' }
     | { type: 'UPDATE_GAME_STATUS' };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -113,6 +117,66 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                 ...initialState,
                 board: initializeBoard()
             };
+        
+        case 'UNDO_MOVE': {
+            // If there's no move to undo, return the current state
+            if (state.moveHistory.length === 0) {
+                return state;
+            }
+
+            // Get the last move
+            const lastMove = state.moveHistory[state.moveHistory.length - 1];
+            
+            // Create a copy of the current board
+            const newBoard = JSON.parse(JSON.stringify(state.board));
+            
+            // Restore the piece to its original position
+            const pieceToRestore = {
+                ...lastMove.piece,
+                position: { ...lastMove.from }
+            };
+            
+            // Clear the destination square
+            newBoard[lastMove.to.row][lastMove.to.col].piece = undefined;
+            
+            // Place the piece back to its original position
+            newBoard[lastMove.from.row][lastMove.from.col].piece = pieceToRestore;
+            
+            // If a piece was captured, restore it
+            if (lastMove.captured) {
+                newBoard[lastMove.to.row][lastMove.to.col].piece = lastMove.captured;
+            }
+            
+            // Update captured pieces
+            const newCapturedPieces = {
+                white: [...state.capturedPieces.white],
+                black: [...state.capturedPieces.black]
+            };
+            
+            if (lastMove.captured) {
+                if (lastMove.captured.color === 'white') {
+                    newCapturedPieces.white = newCapturedPieces.white.slice(0, -1);
+                } else {
+                    newCapturedPieces.black = newCapturedPieces.black.slice(0, -1);
+                }
+            }
+            
+            // Revert to the previous player's turn
+            const previousPlayer = switchPlayer(state.currentPlayer);
+            
+            return {
+                ...state,
+                board: newBoard,
+                currentPlayer: previousPlayer,
+                selectedPiece: undefined,
+                validMoves: [],
+                moveHistory: state.moveHistory.slice(0, -1),
+                capturedPieces: newCapturedPieces,
+                gameStatus: 'playing', // Reset game status when undoing
+                isCheck: false,
+                isCheckmate: false
+            };
+        }
 
         default:
             return state;
@@ -123,6 +187,7 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(gameReducer, initialState);
+    const [isBoardFlipped, setIsBoardFlipped] = useState(false);
 
     const selectPiece = (piece: Piece | undefined) => {
         dispatch({ type: 'SELECT_PIECE', piece });
@@ -135,9 +200,25 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     const resetGame = () => {
         dispatch({ type: 'RESET_GAME' });
     };
+    
+    const undoLastMove = () => {
+        dispatch({ type: 'UNDO_MOVE' });
+    };
+    
+    const flipBoard = () => {
+        setIsBoardFlipped(prev => !prev);
+    };
 
     return (
-        <GameContext.Provider value={{ state, selectPiece, movePiece, resetGame }}>
+        <GameContext.Provider value={{ 
+            state, 
+            selectPiece, 
+            movePiece, 
+            resetGame, 
+            undoLastMove, 
+            isBoardFlipped,
+            flipBoard
+        }}>
             {children}
         </GameContext.Provider>
     );

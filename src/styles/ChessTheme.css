@@ -1,0 +1,507 @@
+/* Chess.com inspired theme styles */
+:root {
+  --primary-color: #312e2b;
+  --secondary-color: #1e1e1e;
+  --light-square: #f0d9b5;
+  --dark-square: #b58863;
+  --highlight-color: #f7e26b;
+  --highlight-border: #ffd700;
+  --text-light: #f0f0f0;
+  --text-dark: #312e2b;
+  --accent-color: #7fa650;
+  --accent-hover: #6a8f44;
+  --board-border: #594a38;
+
+  /* Additional color variables */
+  --btn-active: #8fb85e;
+  --btn-hover: #6a8e44;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--secondary-color);
+  color: var(--text-light);
+  margin: 0;
+  padding: 0;
+}
+
+.app-header {
+  background-color: var(--primary-color);
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-light);
+}
+
+.logo i {
+  margin-right: 0.5rem;
+  color: var(--accent-color);
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chess-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(320px, 600px) 1fr;
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
+  .chess-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.game-container {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.side-panel {
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  padding: 1rem;
+  height: fit-content;
+}
+
+.chess-board {
+  border: 6px solid var(--board-border);
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.game-info-panel {
+  margin-top: 1rem;
+  width: 100%;
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.player-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.player-white {
+  background-color: #fff;
+}
+
+.player-black {
+  background-color: #000;
+}
+
+.player-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.timer {
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.moves-history {
+  margin-top: 1rem;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: monospace;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.move-row {
+  display: grid;
+  grid-template-columns: 2rem 1fr 1fr;
+  line-height: 1.5;
+}
+
+.move-row:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.move-number {
+  text-align: center;
+  color: var(--text-light);
+  opacity: 0.5;
+}
+
+.move {
+  padding: 0 0.5rem;
+}
+
+.move.current {
+  background-color: var(--highlight-color);
+  color: var(--text-dark);
+  border-radius: 2px;
+}
+
+.square.light {
+  background-color: var(--light-square);
+}
+
+.square.dark {
+  background-color: var(--dark-square);
+}
+
+.square.selected {
+  background-color: var(--highlight-color);
+}
+
+.square.valid-move::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.square.valid-move.occupied::before {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  border: 2px solid var(--highlight-border);
+  box-sizing: border-box;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  background-color: var(--accent-color);
+  color: var(--text-light);
+  border: none;
+  border-radius: 4px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--text-light);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Player color selector styles */
+.player-color-selector {
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.player-color-selector h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.color-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.color-option {
+  flex: 1;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.color-option:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.color-option.active {
+  background-color: var(--accent-color);
+}
+
+.color-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.color-icon.white {
+  background-color: #fff;
+  border: 1px solid #000;
+}
+
+.color-icon.black {
+  background-color: #000;
+  border: 1px solid #333;
+}
+
+/* Game options styles */
+.game-options {
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.game-options h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.options-container .btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.options-container .btn i {
+  width: 16px;
+  text-align: center;
+}
+
+/* Improved difficulty selector styles */
+.difficulty-selector {
+  background-color: var(--primary-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.difficulty-selector h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.difficulty-label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.difficulty-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.difficulty-level {
+  flex: 1;
+  min-width: 60px;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s;
+}
+
+.difficulty-level:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.difficulty-level.active {
+  background-color: var(--accent-color);
+}
+
+/* Enhanced chess board styles */
+.chess-board-wrapper {
+  position: relative;
+}
+
+.timer-urgent {
+  color: #dc3545;
+  animation: pulse 1s infinite;
+}
+
+.app-footer {
+  margin-top: 3rem;
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Thinking Indicator Styles */
+.thinking-indicator-detailed {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  min-width: 240px;
+  max-width: 320px;
+  z-index: 100;
+  animation: fadeIn 0.3s ease-out;
+  border-left: 4px solid var(--accent-color);
+}
+
+.thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+}
+
+.thinking-header i {
+  color: var(--accent-color);
+}
+
+.bot-color {
+  color: var(--accent-color);
+}
+
+.thinking-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.stat-value {
+  font-weight: 500;
+}
+
+.depth-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.depth-bar {
+  width: 80px;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.depth-progress {
+  height: 100%;
+  background-color: var(--accent-color);
+  transition: width 0.3s ease;
+}
+
+.positive-score {
+  color: #4caf50;
+}
+
+.negative-score {
+  color: #f44336;
+}
+
+.thinking-moves {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.moves-label {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+
+.moves-sequence {
+  font-family: monospace;
+  font-size: 13px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .chess-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .side-panel {
+    order: 2;
+  }
+  
+  .game-container {
+    grid-column: 1;
+  }
+  
+  .color-options, 
+  .difficulty-options {
+    flex-direction: row;
+  }
+}

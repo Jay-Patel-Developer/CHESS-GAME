@@ -40,5 +40,4 @@ export type GameState = {
     isCheckmate: boolean;
 };
 
-// Ensure GameState is exported
-export type { GameState };
+// GameState is already exported above, removing duplicate export
