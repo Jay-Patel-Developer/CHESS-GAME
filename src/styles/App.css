@@ -183,6 +183,64 @@ body {
     flex: 1;
 }
 
+/* Difficulty selector styles */
+.difficulty-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: var(--spacing-md);
+}
+
+.difficulty-label {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.difficulty-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.difficulty-level {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  min-width: 80px; /* Increased to better fit "Medium" text */
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  /* border: 1px solid rgba(255, 255, 255, 0.2); */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 400;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.difficulty-level:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.difficulty-level.active {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 /* Responsive Design */
 @media (min-width: 1921px) {
     html {

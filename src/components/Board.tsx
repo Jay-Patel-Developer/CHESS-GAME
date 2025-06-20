@@ -151,21 +151,26 @@ const Board: FC = () => {
     // Render coordinates around the board based on whether the board is flipped
     const renderCoordinates = () => {
         const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-        const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
+        const ranks = ['1', '2', '3', '4', '5', '6', '7', '8'];
         
-        const orderedFiles = isBoardFlipped ? [...files].reverse() : files;
-        const orderedRanks = isBoardFlipped ? [...ranks].reverse() : ranks;
-        
+        // Determine the order based on board orientation
+        const fileElements = isBoardFlipped ? [...files].reverse() : files;
+        const rankElements = isBoardFlipped ? ranks : [...ranks].reverse();
+
         return (
             <>
                 <div className="coordinates-x">
-                    {orderedFiles.map((file, i) => (
-                        <span key={i} className="coordinate">{file}</span>
+                    {fileElements.map((file) => (
+                        <span key={file} className="coordinate">
+                            {file}
+                        </span>
                     ))}
                 </div>
                 <div className="coordinates-y">
-                    {orderedRanks.map((rank, i) => (
-                        <span key={i} className="coordinate">{rank}</span>
+                    {rankElements.map((rank) => (
+                        <span key={rank} className="coordinate">
+                            {rank}
+                        </span>
                     ))}
                 </div>
             </>
@@ -174,30 +179,32 @@ const Board: FC = () => {
 
     return (
         <div 
-            className="chess-board"
-            onKeyDown={handleKeyDown}
+            className="chess-board-container"
             tabIndex={0}
             role="grid"
             aria-label="Chess board"
+            onKeyDown={handleKeyDown}
         >
-            <div className="board-content">
-                {renderBoard()}
-            </div>
             {renderCoordinates()}
-            
-            {state.gameStatus === 'checkmate' && (
-                <div className="game-over" role="alert">
-                    Checkmate! {switchPlayer(currentPlayer)} wins!
+            <div className="chess-board">
+                <div className="board-content">
+                    {renderBoard()}
                 </div>
-            )}
-            {state.gameStatus === 'check' && (
-                <div className="check-alert" role="alert">
-                    Check!
-                </div>
-            )}
-            {isThinking && currentPlayer === botColor && (
-                <ThinkingIndicator />
-            )}
+                
+                {state.gameStatus === 'checkmate' && (
+                    <div className="game-over" role="alert">
+                        Checkmate! {switchPlayer(currentPlayer)} wins!
+                    </div>
+                )}
+                {state.gameStatus === 'check' && (
+                    <div className="check-alert" role="alert">
+                        Check!
+                    </div>
+                )}
+                {isThinking && currentPlayer === botColor && (
+                    <ThinkingIndicator />
+                )}
+            </div>
         </div>
     );
 };

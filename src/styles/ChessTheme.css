@@ -486,6 +486,40 @@ body {
   word-break: break-all;
 }
 
+/* Chess coordinates styling */
+.coordinates-x,
+.coordinates-y {
+  position: absolute;
+  display: flex;
+  font-size: 0.8rem;
+  color: #fff;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.coordinates-x {
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  justify-content: space-around;
+}
+
+.coordinates-y {
+  top: 0;
+  bottom: 0;
+  left: -20px;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.coordinate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .chess-layout {
